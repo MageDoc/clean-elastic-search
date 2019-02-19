@@ -16,8 +16,9 @@ class Clean_ElasticSearch_Model_IndexType_Config extends Clean_ElasticSearch_Mod
         foreach ($sections as $sectionCode => $section) {
             if (isset($section['groups'])) {
                 foreach ($section['groups'] as $group) {
-                    if (isset($group['fields'])) {
+                    if (isset($group['fields']) && is_array($group['fields'])) {
                         foreach ($group['fields'] as $field) {
+                            if(!isset($field['label'])) continue;
                             $fields[] = array(
                                 'section'       => $section['label'],
                                 'section_code'  => $sectionCode,
