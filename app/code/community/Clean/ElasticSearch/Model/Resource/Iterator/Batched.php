@@ -2,7 +2,7 @@
 
 class Clean_ElasticSearch_Model_Resource_Iterator_Batched extends Varien_Object
 {
-    const DEFAULT_BATCH_SIZE = 250;
+    const DEFAULT_BATCH_SIZE = 1000;
 
     /**
      * This allows you to walk through a large collection and perform

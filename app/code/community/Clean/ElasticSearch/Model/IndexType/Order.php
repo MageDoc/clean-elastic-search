@@ -7,7 +7,12 @@ class Clean_ElasticSearch_Model_IndexType_Order extends Clean_ElasticSearch_Mode
         return 'order';
     }
 
-    public function index()
+    /**
+     * @depreciated Abstract index() is used for batch indexing
+     * @throws Exception
+     */
+
+    public function _index()
     {
         $this->delete();
 
