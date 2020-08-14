@@ -5,7 +5,7 @@
             <groups>
                 <search>
                     <fields>
-                        <elasticsearch_verify_host translate="label comment" module="elasticsearch">
+                        <elasticsearch_verify_host translate="label comment" module="cleanelastic">
                             <label>Verify Host</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -15,7 +15,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </elasticsearch_verify_host>
-                        <elasticsearch_timeout translate="label comment" module="elasticsearch">
+                        <elasticsearch_timeout translate="label comment" module="cleanelastic">
                             <label>Server Timeout</label>
                             <comment>Number of seconds after a timeout occurs for every request. If using indexing of file, large value necessary.</comment>
                             <frontend_type>text</frontend_type>
@@ -25,7 +25,7 @@
                             <show_in_store>0</show_in_store>
                             <validate>required-entry validate-greater-than-zero validate-number</validate>
                         </elasticsearch_timeout>
-                        <elasticsearch_number_of_shards translate="label comment" module="elasticsearch">
+                        <elasticsearch_number_of_shards translate="label comment" module="cleanelastic">
                             <label>Number of Shards</label>
                             <frontend_type>text</frontend_type>
                             <comment>Having more shards enhances the indexing performance and allows to distribute a big index across machines.</comment>
@@ -35,7 +35,7 @@
                             <show_in_store>1</show_in_store>
                             <validate>required-entry validate-greater-than-zero validate-digits</validate>
                         </elasticsearch_number_of_shards>
-                        <elasticsearch_number_of_replicas translate="label comment" module="elasticsearch">
+                        <elasticsearch_number_of_replicas translate="label comment" module="cleanelastic">
                             <label>Number of Replicas</label>
                             <frontend_type>text</frontend_type>
                             <comment><![CDATA[The number of replicas each shard has. Having more replicas enhances the search performance and improves the cluster availability.<br /><strong><span style="color: red;">Be careful</span></strong> when modifying this parameter. Write consistency (one, quorum or all) must be considered in order to avoid timeout write action. More info here: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html#bulk-consistency" target="_blank">https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html#bulk-consistency</a> and here <a href="https://github.com/elasticsearch/elasticsearch/issues/444" target="_blank">https://github.com/elasticsearch/elasticsearch/issues/444</a>]]></comment>
