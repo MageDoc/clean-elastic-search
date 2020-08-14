@@ -67,4 +67,14 @@ class Clean_ElasticSearch_Model_IndexType_Order extends Clean_ElasticSearch_Mode
         $document = new \Elastica\Document($data['id'], $data);
         return $document;
     }
+
+    public function getSearchFields($q, $analyzer = false, $withBoost = true)
+    {
+        return array(
+            'firstname',
+            'lastname',
+            'fullname',
+            'email',
+            'increment_id');
+    }
 }

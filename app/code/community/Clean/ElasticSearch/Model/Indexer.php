@@ -29,9 +29,11 @@ class Clean_ElasticSearch_Model_Indexer extends Mage_Index_Model_Indexer_Abstrac
     public function reindexAll()
     {
         Mage::getSingleton('core/resource')->getConnection('core_write')->query("SET session wait_timeout=3600");
-        Mage::getModel('cleanelastic/indexType_product')->index();
-        Mage::getModel('cleanelastic/indexType_order')->index();
-        Mage::getModel('cleanelastic/indexType_customer')->index();
-        Mage::getModel('cleanelastic/indexType_config')->index();
+        /** @var Clean_ElasticSearch_Model_Index $indexManager */
+        $indexManager = Mage::getSingleton('cleanelastic/index');
+        $indexManager->deleteIndex();
+        foreach (Mage::helper('cleanelastic')->getStoreTypes() as $type){
+            $indexManager->getIndexer($type)->index();
+        }
     }
 }

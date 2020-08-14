@@ -18,7 +18,7 @@ class Clean_ElasticSearch_Model_IndexType_Config extends Clean_ElasticSearch_Mod
                 foreach ($section['groups'] as $group) {
                     if (isset($group['fields']) && is_array($group['fields'])) {
                         foreach ($group['fields'] as $field) {
-                            if(!isset($field['label'])) continue;
+                            if(!isset($field['label']) || !isset($section['label'])) continue;
                             $fields[] = array(
                                 'section'       => $section['label'],
                                 'section_code'  => $sectionCode,
@@ -45,5 +45,10 @@ class Clean_ElasticSearch_Model_IndexType_Config extends Clean_ElasticSearch_Mod
 
         $document = new \Elastica\Document('', $data);
         return $document;
+    }
+
+    public function getSearchFields($q, $analyzer = false, $withBoost = true)
+    {
+        return array('field', 'section', 'group');
     }
 }

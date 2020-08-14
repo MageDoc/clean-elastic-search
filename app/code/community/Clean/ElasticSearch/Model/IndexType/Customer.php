@@ -47,4 +47,15 @@ class Clean_ElasticSearch_Model_IndexType_Customer extends Clean_ElasticSearch_M
         $document = new \Elastica\Document($customer->getId(), $data);
         return $document;
     }
+
+    public function getSearchFields($q, $analyzer = false, $withBoost = true)
+    {
+        return array(
+            'firstname',
+            'lastname',
+            'fullname',
+            'email',
+            'telephone',
+            'fax');
+    }
 }

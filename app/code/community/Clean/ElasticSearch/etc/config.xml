@@ -53,5 +53,22 @@
             </sales_order_place_after>
         </events>
     </global>
-
+    <default>
+        <catalog>
+            <search>
+                <elasticsearch_enable_debug_mode>0</elasticsearch_enable_debug_mode>
+                <elasticsearch_enable_suggest>1</elasticsearch_enable_suggest>
+                <elasticsearch_servers>127.0.0.1:9200</elasticsearch_servers>
+                <elasticsearch_verify_host>1</elasticsearch_verify_host>
+                <elasticsearch_timeout>5</elasticsearch_timeout>
+                <elasticsearch_index_prefix/>
+                <elasticsearch_number_of_shards>5</elasticsearch_number_of_shards>
+                <elasticsearch_number_of_replicas>0</elasticsearch_number_of_replicas>
+                <elasticsearch_safe_reindex>1</elasticsearch_safe_reindex>
+                <elasticsearch_query_operator>AND</elasticsearch_query_operator>
+                <elasticsearch_enable_source>0</elasticsearch_enable_source>
+                <elasticsearch_enable_fuzzy_query>1</elasticsearch_enable_fuzzy_query>
+            </search>
+        </catalog>
+    </default>
 </config>

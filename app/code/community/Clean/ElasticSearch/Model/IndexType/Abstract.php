@@ -58,7 +58,7 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
             } elseif ((strpos($e->getMessage(), 'IndexMissingException') !== false)) {
                 // Do nothing
             } else {
-                throw $e;
+                //throw $e;
             }
         }
     }
@@ -85,5 +85,51 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
         }
 
         return $this;
+    }
+
+    public function getStoreIndexProperties($store = null)
+    {
+        return array();
+    }
+
+    /**
+     * Retrieves search fields of specific analyzer if specified
+     *
+     * @param string $q
+     * @param mixed $analyzer
+     * @param bool $withBoost
+     * @return array
+     */
+    public function getSearchFields($q, $analyzer = false, $withBoost = true)
+    {
+        $fields = array();
+        foreach ($this->getStoreIndexProperties() as $fieldName => $property) {
+            // If field is not searchable, ignore it
+            if (!isset($property['include_in_all']) ||
+                !$property['include_in_all'] ||
+                $property['type'] == 'integer' && !is_int($q))
+            {
+                continue;
+            }
+
+            $boost = 1;
+            if ($withBoost && isset($property['boost'])) {
+                $boost = intval($property['boost']);
+            }
+
+            if (!$analyzer || (isset($property['analyzer']) && $property['analyzer'] == $analyzer)) {
+                $fields[] = $fieldName . ($boost > 1 ? '^' . $boost : '');
+            }
+
+            if (isset($property['fields'])) {
+                foreach ($property['fields'] as $key => $field) {
+                    if (!$analyzer || (isset($field['analyzer']) && $field['analyzer'] == $analyzer)) {
+                        $fields[] = $fieldName . '.' . $key . ($boost > 1 ? '^' . $boost : '');
+                    }
+                }
+            }
+        }
+
+        return $fields;
     }
 }

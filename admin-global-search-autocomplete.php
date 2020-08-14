@@ -29,16 +29,16 @@ if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
 
 function checkAccess()
 {
-    $xml = new SimpleXMLElement(file_get_contents('app/etc/local.xml'));
-    if (!isset($xml->global->elasticsearch->secret)) {
-        throw new Exception("Missing elasticsearch secret config in local.xml");
+    $secret = Mage::helper('cleanelastic')->getSecret();
+    if (is_null($secret)) {
+        throw new Exception("Missing elasticsearch secret config xml");
     }
 
     if (!isset($_GET['key'])) {
         throw new Exception("Missing or invalid key");
     }
 
-    if ($_GET['key'] != (string)$xml->global->elasticsearch->secret) {
+    if ($_GET['key'] != $secret) {
         throw new Exception("Missing or invalid key");
     }
 
@@ -51,24 +51,7 @@ function checkAccess()
  */
 function getElasticaIndex()
 {
-    $xml = new SimpleXMLElement(file_get_contents('app/etc/local.xml'));
-    if (!isset($xml->global->elasticsearch)) {
-        throw new Exception("Missing elasticsearch config in local.xml");
-    }
-
-    if (! (string)$xml->global->elasticsearch->index) {
-        throw new Exception("Missing elasticsearch index name in local.xml");
-    }
-
-    /* var $elasticaClient Elastica\Client */
-    $elasticaClient = new \Elastica\Client(array(
-        'host' => (string)$xml->global->elasticsearch->host,
-        'port' => (string)$xml->global->elasticsearch->port,
-    ));
-
-    $index = $elasticaClient->getIndex((string)$xml->global->elasticsearch->index);
-
-    return $index;
+    return Mage::getSingleton('cleanelastic/index')->getIndex();
 }
 
 /**
@@ -167,19 +150,24 @@ if (!$query) {
     die("Missing ?query");
 }
 
+$fields = array();
+foreach (Mage::helper('cleanelastic')->getStoreTypes() as $type){
+    $fields = array_merge(
+        $fields,
+        Mage::getSingleton('cleanelastic/index')
+            ->getIndexer($type)
+            ->getSearchFields($query)
+    );
+}
+$fields = array_unique($fields);
+
 $elasticaQueryString  = new \Elastica\Query\MultiMatch();
-$elasticaQueryString->setFields(array(
-    'firstname', 'lastname', 'fullname',
-    'email', 'increment_id',
-    'field', 'section', 'group',
-    'name',
-    'telephone',
-    'fax',
-    'code','code_normalized','short_description','product_id'
-));
+$elasticaQueryString->setFields(array_values($fields));
 $elasticaQueryString->setQuery($query);
 //$elasticaQueryString->setParam('type', 'phrase_prefix');
-$elasticaQueryString->setParam('type', 'best_fields');
+//$elasticaQueryString->setParam('type', 'best_fields');
+$elasticaQueryString->setParam('type', 'cross_fields');
+
 $elasticaQueryString->setTieBreaker(0.3);
 
 
