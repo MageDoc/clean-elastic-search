@@ -2,11 +2,16 @@
 
 abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Object
 {
-    const BULK_SIZE = 1000;
+    const BULK_SIZE = 4000;
 
     abstract protected function _getIndexTypeCode();
     abstract protected function _getCollection();
     abstract protected function _prepareDocument($item);
+
+    public function getIndexTypeCode()
+    {
+        return $this->_getIndexTypeCode();
+    }
 
     public function index()
     {
@@ -45,7 +50,7 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
 
     protected function _getIndexType()
     {
-        return Mage::getSingleton('cleanelastic/index')->getIndex()->getType($this->_getIndexTypeCode());
+        return Mage::getSingleton('cleanelastic/index')->getIndex()->getType($this->getIndexTypeCode());
     }
 
     public function delete()

@@ -43,13 +43,10 @@ class Clean_ElasticSearch_Model_Index extends Varien_Object
      */
     public function getIndex()
     {
-        if (isset($this->_index)) {
-            return $this->_index;
+        if (!isset($this->_index)) {
+            $this->_index = $this->_initIndex();
         }
 
-        $elasticaIndex = $this->_initIndex();
-
-        $this->_index = $elasticaIndex;
         return $this->_index;
     }
 
@@ -64,7 +61,9 @@ class Clean_ElasticSearch_Model_Index extends Varien_Object
             $index->create(array('settings' => $this->_helper->getStoreIndexSettings($store)));
 
             // Send index mapping if not yet defined
-            foreach ($this->_helper->getStoreTypes($store) as $type) {
+            foreach ($this->_helper->getStoreTypes($store) as $indexerType) {
+                $indexer = $this->getIndexer($indexerType);
+                $type = $indexer->getIndexTypeCode();
                 if ($index->getType($type)->exists()) {
                     continue;
                 }
@@ -75,7 +74,7 @@ class Clean_ElasticSearch_Model_Index extends Varien_Object
                 }
 
                 // Hanle boost at query time
-                $properties = $this->getIndexer($type)->getStoreIndexProperties($store);
+                $properties = $indexer->getStoreIndexProperties($store);
                 foreach ($properties as &$field) {
                     if (isset($field['boost'])) {
                         unset($field['boost']);
@@ -92,6 +91,7 @@ class Clean_ElasticSearch_Model_Index extends Varien_Object
                     'store' => $store,
                     'mapping' => $mapping,
                     'type' => $type,
+                    'indexer' => $indexer
                 ));
 
                 $mapping->getType()->request(

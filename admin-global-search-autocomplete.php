@@ -72,7 +72,11 @@ function getResultUrl($result)
     } elseif ($type == 'product') {
 	    return Mage::helper('adminhtml')->getUrl('adminhtml/catalog_product/edit', array('id' => $result->getId()));
         return str_replace('index/index', 'catalog_product/edit/id/' . $result->getId(), $baseUrl);
-    } elseif ($type == 'config') {
+    } elseif ($type == 'flat_product') {
+        return !empty($data['product_id'])
+            ? Mage::helper('adminhtml')->getUrl('adminhtml/catalog_product/edit', array('id' => $data['product_id']))
+            : Mage::helper('adminhtml')->getUrl('adminhtml/catalog_product/new', array('popup' => 1, 'data_id' => $result->getId()));
+    }  elseif ($type == 'config') {
 	    return Mage::helper('adminhtml')->getUrl('adminhtml/system_config/edit', array('section' => $data['section_code']));
         return str_replace('index/index', 'system_config/edit/section/' . $data['section_code'], $baseUrl);
     }
@@ -90,7 +94,7 @@ function getName($result)
 
     if (in_array($type, array('order', 'customer'))) {
         return $data['fullname'];
-    } elseif ($type == 'product') {
+    } elseif (in_array($type, array('product', 'flat_product'))) {
         return $data['name'];
     } elseif ($type == 'config') {
         return $data['field'];
@@ -116,6 +120,7 @@ function getDescription($result)
     } elseif ($result->getType() == 'config') {
         return $data['section'] . ' > ' . $data['group'];
     }
+    return '';
 }
 
 function getId($result)
