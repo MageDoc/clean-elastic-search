@@ -16,9 +16,15 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
     public function index()
     {
         $this->delete();
+        $collection = $this->_getCollection();
+
+        $this->indexCollection($collection);
+    }
+
+    public function indexCollection($collection)
+    {
         $indexType = $this->_getIndexType();
 
-        $collection = $this->_getCollection();
         $bunch = array();
         $i = 0;
 
@@ -46,6 +52,8 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
         if ($bunch){
             $indexType->addDocuments($bunch);
         }
+
+        return $this;
     }
 
     protected function _getIndexType()
@@ -128,8 +136,11 @@ abstract class Clean_ElasticSearch_Model_IndexType_Abstract extends Varien_Objec
 
             if (isset($property['fields'])) {
                 foreach ($property['fields'] as $key => $field) {
+                    $_boost = isset($field['boost'])
+                        ? intval($field['boost'])
+                        : max($boost - 1, 1);
                     if (!$analyzer || (isset($field['analyzer']) && $field['analyzer'] == $analyzer)) {
-                        $fields[] = $fieldName . '.' . $key . ($boost > 1 ? '^' . $boost : '');
+                        $fields[] = $fieldName . '.' . $key . ($_boost > 1 ? '^' . $_boost : '');
                     }
                 }
             }

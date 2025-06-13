@@ -168,6 +168,9 @@ class Clean_ElasticSearch_Model_Index extends Varien_Object
 
     public function getIndexer($type)
     {
-        return Mage::getSingleton('cleanelastic/indexType_'.$type);
+        $indexModel = Mage::getConfig()->getNode('global/index/indexer/cleanelastic_indexer/entity_type/'.$type)
+            ? (string)Mage::getConfig()->getNode('global/index/indexer/cleanelastic_indexer/entity_type/'.$type)
+            : 'cleanelastic/indexType_'.$type;
+        return Mage::getSingleton($indexModel);
     }
 }

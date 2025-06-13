@@ -30,6 +30,12 @@
             <indexer>
                 <cleanelastic_indexer>
                     <model>cleanelastic/indexer</model>
+                    <entity_type>
+                        <product>cleanelastic/indexType_product</product>
+                        <config>cleanelastic/indexType_config</config>
+                        <customer>cleanelastic/indexType_customer</customer>
+                        <order>cleanelastic/indexType_order</order>
+                    </entity_type>
                 </cleanelastic_indexer>
             </indexer>
         </index>

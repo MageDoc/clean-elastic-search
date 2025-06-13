@@ -171,6 +171,16 @@ class Clean_ElasticSearch_Helper_Data extends Mage_Core_Helper_Abstract
                 'char_filter' => array('html_strip', 'yo_filter'), // strip html tags
                 'filter' => array('standard', 'asciifolding', 'lowercase', 'stop', 'length', 'latinTransform'),
             ),
+            'brand_prefix' => array(
+                'tokenizer' => 'standard',
+                'char_filter' => array('html_strip', 'yo_filter'), // strip html tags
+                'filter' => array('standard', 'asciifolding', 'lowercase', 'stop', 'length', 'latinTransform', 'edge_ngram_front'),
+            ),
+            'brand_suffix' => array(
+                'tokenizer' => 'standard',
+                'char_filter' => array('html_strip', 'yo_filter'), // strip html tags
+                'filter' => array('standard', 'asciifolding', 'lowercase', 'stop', 'length', 'latinTransform', 'edge_ngram_back'),
+            ),
             'keyword' => array(
                 'tokenizer' => 'keyword',
                 'char_filter' => 'normalizeCodeFilter',
@@ -291,7 +301,18 @@ class Clean_ElasticSearch_Helper_Data extends Mage_Core_Helper_Abstract
                 'char_filter' => 'html_strip', // strip html tags
                 'filter' => $languageFilters,
             );
-
+            $indexSettings['analysis']['analyzer']['language_prefix'] = array(
+                'type' => 'custom',
+                'tokenizer' => 'standard',
+                'char_filter' => 'html_strip', // strip html tags
+                'filter' => array_merge($languageFilters, array('edge_ngram_front')),
+            );
+            $indexSettings['analysis']['analyzer']['language_suffix'] = array(
+                'type' => 'custom',
+                'tokenizer' => 'standard',
+                'char_filter' => 'html_strip', // strip html tags
+                'filter' => array_merge($languageFilters, array('edge_ngram_back')),
+            );
             // Define stop words filter according to current language if possible
             $stopwords = strtolower($language);
             if (in_array($stopwords, $this->_stopLanguages)) {
@@ -390,9 +411,8 @@ class Clean_ElasticSearch_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getStoreTypes($store = null)
     {
-        $types = array('product', 'config', 'customer', 'order');
-        if ($this->isModuleEnabled('Testimonial_FlatCatalog')) {
-            $types []= 'flatProduct';
+        foreach (Mage::getConfig()->getNode('global/index/indexer/cleanelastic_indexer/entity_type')->asArray() as $entityType => $model) {
+            $types [] = $entityType;
         }
 
         return $types;
