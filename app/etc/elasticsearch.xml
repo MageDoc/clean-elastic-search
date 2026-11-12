@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<config>
+    <global>
+        <elasticsearch>
+            <host>127.0.0.1</host>
+            <port>9200</port>
+            <secret></secret>
+            <index>change_this_to_your_index</index>
+        </elasticsearch>
+    </global>
+</config>

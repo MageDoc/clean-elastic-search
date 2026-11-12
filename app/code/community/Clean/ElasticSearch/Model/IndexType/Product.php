@@ -7,6 +7,25 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
         return 'product';
     }
 
+    /** @todo: replace hardcoded additional locale array with configuration option
+      * the module could fail now if store 3 does not exist
+    /**
+
+    public function getAdditionalLocales()
+    {
+        $storeIds = [3];
+        $locales = array();
+        foreach ($storeIds as $storeId) {
+            try {
+                $localeCode = explode('_', Mage::getStoreConfig('general/locale/code', $storeId))[0];
+                $locales[$localeCode] = $storeId;
+            } catch (Exception $e) {
+
+            }
+        }
+        return $locales;
+    }
+
     protected function _getCollection()
     {
         $products = Mage::getResourceModel('catalog/product_collection')
@@ -16,6 +35,11 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
         //->joinAttribute('description', 'catalog_product/description', 'entity_id', null, $joinType='left');
         //->addAttributeToSelect('name')
         //->addAttributeToSelect('description');
+
+        foreach ($this->getAdditionalLocales() as $locale => $storeId) {
+            $products->joinAttribute("name_{$locale}", 'catalog_product/name', 'entity_id', null, 'left', $storeId);
+            $products->joinAttribute("short_description_{$locale}", 'catalog_product/short_description', 'entity_id', null, 'left', $storeId);
+        }
 
         if (Mage::helper('cleanelastic')->isModuleEnabled('Testimonial_MageDoc')) {
             $tecdocResource = Mage::getResourceSingleton('magedoc/tecdoc_artLookup');
@@ -61,46 +85,84 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
                 : array(),
         );
 
+        foreach ($this->getAdditionalLocales() as $locale => $storeId) {
+            $data["name_{$locale}"] = $product->getData("name_{$locale}");
+            $data["short_description_{$locale}"] = $product->getData("short_description_{$locale}");
+        }
+
         $document = new \Elastica\Document($data['id'], $data, $this->_getIndexTypeCode());
         return $document;
     }
 
     public function getStoreIndexProperties($store = null)
     {
-        return array(
-            'name' =>
+        $nameConfiguration = array(
+            'type' => 'string',
+            'analyzer' => 'language',
+            'include_in_all' => true,
+            'boost' => 5,
+            'fields' =>
                 array(
-                    'type' => 'string',
-                    'analyzer' => 'language',
-                    'include_in_all' => true,
-                    'boost' => 5,
-                    'fields' =>
+                    'std' =>
                         array(
-                            'std' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'std',
-                                ),
-                            'prefix' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'language_prefix',
-                                    'search_analyzer' => 'language',
-                                ),
-                            'suffix' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'language_suffix',
-                                    'search_analyzer' => 'language',
-                                ),
+                            'type' => 'string',
+                            'analyzer' => 'std',
+                        ),
+                    'prefix' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'language_prefix',
+                            'search_analyzer' => 'language',
+                        ),
+                    'suffix' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'language_suffix',
+                            'search_analyzer' => 'language',
                         ),
                 ),
+        );
+        $shortDescriptionConfiguration = array(
+            'type' => 'string',
+            'analyzer' => 'language',
+            'include_in_all' => true,
+            'boost' => 2,
+            'fields' =>
+                array(
+                    'std' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'std',
+                        ),
+                    'prefix' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'language_prefix',
+                            'search_analyzer' => 'language',
+                        ),
+                    'suffix' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'language_suffix',
+                            'search_analyzer' => 'language',
+                        ),
+                    'used_in_cars_short_prefix' =>
+                        array(
+                            'type' => 'string',
+                            'analyzer' => 'brand_prefix',
+                            'search_analyzer' => 'brand',
+                        ),
+                ),
+        );
+        $indexProperties = array(
+            'name' =>
+                $nameConfiguration,
             'manufacturer' =>
                 array(
                     'type' => 'string',
                     'analyzer' => 'brand',
                     'include_in_all' => true,
-                    'boost' => 6,
+                    'boost' => 4,
                     'fields' =>
                         array(
                             'std' =>
@@ -117,38 +179,7 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
                         )
                 ),
             'short_description' =>
-                array(
-                    'type' => 'string',
-                    'analyzer' => 'language',
-                    'include_in_all' => true,
-                    'boost' => 2,
-                    'fields' =>
-                        array(
-                            'std' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'std',
-                                ),
-                            'prefix' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'language_prefix',
-                                    'search_analyzer' => 'language',
-                                ),
-                            'suffix' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'language_suffix',
-                                    'search_analyzer' => 'language',
-                                ),
-                            'used_in_cars_short_prefix' =>
-                                array(
-                                    'type' => 'string',
-                                    'analyzer' => 'brand_prefix',
-                                    'search_analyzer' => 'brand',
-                                ),
-                        ),
-                ),
+                $shortDescriptionConfiguration,
             /*'used_in_cars_short' =>
                 array(
                     'type' => 'string',
@@ -318,5 +349,12 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
                     'index' => 'no',
                 ),
         );
+
+        foreach ($this->getAdditionalLocales() as $locale => $storeId) {
+            $indexProperties["name_$locale"] = $nameConfiguration;
+            $indexProperties["short_description_$locale"] = $shortDescriptionConfiguration;
+        }
+
+        return $indexProperties;
     }
 }
