@@ -9,7 +9,7 @@ class Clean_ElasticSearch_Model_IndexType_Product extends Clean_ElasticSearch_Mo
 
     /** @todo: replace hardcoded additional locale array with configuration option
       * the module could fail now if store 3 does not exist
-    /**
+    **/
 
     public function getAdditionalLocales()
     {
